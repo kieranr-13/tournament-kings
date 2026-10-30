@@ -57,5 +57,67 @@ at most as many wins. Several vertices can tie for the maximum
 def HasMaximumOutdegree [Fintype V]
     (T : Tournament V) (v : V) : Prop :=
   ∀ u, outdegree T u ≤ outdegree T v
+
+/-! ## Membership in the Defeated-Opponents Set
+
+This lemma lets us translate between finite-set membership
+and the statement that one team defeated another.
+-/
+
+/-- u belongs to v's defeated-opponents set exactly when v beats u-/
+theorem mem_defeatedOpponents [Fintype V]
+    (T : Tournament V) (v u : V) :
+    u ∈ defeatedOpponents T v ↔ T.Beats v u := by
+  classical
+  simp [defeatedOpponents]
+
+/-! ## Existence of a Maximum-Outdegree Vertex
+
+There are finitely many vertices and at least one vertex,
+so some vertex has at least as many wins as every other vertex
+-/
+
+/-- Every finite, nonempty tournament has a maximum-outdegree vertex-/
+theorem exists_maximum_outdegree [Fintype V] [Nonempty V]
+    (T : Tournament V) :
+    ∃ v, HasMaximumOutdegree T v := by
+  classical
+  -- Choose a vertex maximizing outdegree among all vertices.
+  obtain ⟨v, _, hmax⟩ :=
+    Finset.exists_max_image (Finset.univ : Finset V)
+      (outdegree T) Finset.univ_nonempty
+  use v
+  intro u
+  exact hmax u (Finset.mem_univ u)
+
+/-! ## Unreachable Vertices
+
+If v cannot reach a disctinct vertex u in one or two steps,
+then u beats v and every opponent defeated by v.
+-/
+
+/-- An unreachable vertex beats v and all of v's defeated opponenets. -/
+theorem unreachable_beats_all
+    (T : Tournament V) (v u : V)
+    (hne : u ≠ v)
+    (hno_direct : ¬T.Beats v u)
+    (hno_two : ¬ ∃ w, T.Beats v w ∧ T.Beats w u) :
+    T.Beats u v ∧ ∀ w, T.Beats v w → T.Beats u w := by
+  constructor
+  · -- One team must win; v does not beat u, so u beats v
+    rcases T.total u v hne with huv | hvu
+    · exact huv
+    · exact False.elim (hno_direct hvu)
+  · intro w hvw
+    -- If w = u, then v beats u, conttradicting hno_direct
+    have hwu : w ≠ u := by
+      intro heq
+      subst w
+      exact hno_direct hvw
+    rcases T.total w u hwu with hwu_win | huw
+    · -- v beating w and w beating u would give a two-step route.
+      exact False.elim (hno_two ⟨w, hvw, hwu_win⟩)
+    · exact huw
+
 end
 end TournamentKings
