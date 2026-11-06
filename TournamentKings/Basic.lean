@@ -119,5 +119,38 @@ theorem unreachable_beats_all
       exact False.elim (hno_two ⟨w, hvw, hwu_win⟩)
     · exact huw
 
+/-! ## Comparing Outdegrees
+
+If u beats v and every opponent v beats, then u's defeated-opponents
+set contains all of v's defeated opponents plus at least one more: v.
+-/
+
+/-- Beating v and all of v's defeated opponents gives u more wins. -/
+theorem outdegree_lt_of_beats_all [Fintype V]
+  (T : Tournament V) (v u : V)
+  (huv : T.beats u v)
+  (hall : T.beats u v)
+  (hall : ∀ w, T.Beats v w → T.Beats u w) :
+  outdegree T v < outdegree T u := by
+  --Every opponent v beats also belongs to u's set.
+  have hsubset : defeatedOpponents T v ⊆ defeatedOpponents T u := by
+    intro w hwv
+    have hvw : T.beats v w := (mem_defeatedOponnents t v w).mp hw
+    exact (mem_defeatedOpponents T u w).mpr (hall w hvw)
+
+  --The reverse inclusion fails: u beats v, but v cannot beat itself.
+  have hnot_reverse : ¬ (defeatedOpponents T u ⊆ defeatedOpponents T v) := by
+    intro hreverse
+    have hmem_u : v ∈ defeatedOpponents T u :=
+      (mem_defeatedOpponents T u v).mpr huv
+    have hmem_v : v ∈ defeatedOpponents T v := hreverse hmem_u
+    exact T.no_self v ((mem_defeatedOpponents T v v).mp hmem_v)
+
+  --A proper subset of a finite set has fewer elements.
+  have hstrict : defeatedOpponents T v ⊂ defeatedOpponents T u :=
+    lt_of_le_not_le hsubset hnot_reverse
+  exact Finset.card_lt_card hstrict
+
+
 end
 end TournamentKings
