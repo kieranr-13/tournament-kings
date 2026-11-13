@@ -1,4 +1,5 @@
-import Mathlib
+import import Mathlib.TacticMinImports
+
 
 namespace TournamentKings
 
@@ -21,7 +22,7 @@ variable {V : Type*}
 
 noncomputable section
 
-/-- The finite set of opponents defeated by v-/
+/-- The finite set of opponents defeated by v -/
 def defeatedOpponents [Fintype V]
     (T : Tournament V) (v : V) : Finset V := by
   classical
@@ -33,7 +34,7 @@ The outdegree of a vertex is it's number of wins.
 We count the elements of its defeated-opponents set.
 -/
 
-/-- The number of opponents defeated by v-/
+/-- The number of opponents defeated by v -/
 def outdegree [Fintype V] (T : Tournament V) (v : V) : ℕ :=
   (defeatedOpponents T v).card
 
@@ -43,7 +44,7 @@ In sports terms, it either defeated a team or defeated
 another team that defeated that team.
 -/
 
-/-- A vertex that reaches every other vertex in one or two steps-/
+/-- A vertex that reaches every other vertex in one or two steps -/
 def isKing (T : Tournament V) (v : V) : Prop :=
   ∀ u, u ≠ v → T.Beats v u ∨ ∃ w, T.Beats v w ∧ T.Beats w u
 
@@ -64,7 +65,7 @@ This lemma lets us translate between finite-set membership
 and the statement that one team defeated another.
 -/
 
-/-- u belongs to v's defeated-opponents set exactly when v beats u-/
+/-- u belongs to v's defeated-opponents set exactly when v beats u -/
 theorem mem_defeatedOpponents [Fintype V]
     (T : Tournament V) (v u : V) :
     u ∈ defeatedOpponents T v ↔ T.Beats v u := by
@@ -77,7 +78,7 @@ There are finitely many vertices and at least one vertex,
 so some vertex has at least as many wins as every other vertex
 -/
 
-/-- Every finite, nonempty tournament has a maximum-outdegree vertex-/
+/-- Every finite, nonempty tournament has a maximum-outdegree vertex -/
 theorem exists_maximum_outdegree [Fintype V] [Nonempty V]
     (T : Tournament V) :
     ∃ v, HasMaximumOutdegree T v := by
@@ -151,6 +152,6 @@ theorem outdegree_lt_of_beats_all [Fintype V]
     lt_of_le_not_le hsubset hnot_reverse
   exact Finset.card_lt_card hstrict
 
-
+#min-imports
 end
 end TournamentKings
