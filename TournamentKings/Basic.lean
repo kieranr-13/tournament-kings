@@ -137,7 +137,6 @@ theorem outdegree_lt_of_beats_all [Fintype V]
     intro w hwv
     have hvw : T.Beats v w := (mem_defeatedOpponents T v w).mp hwv
     exact (mem_defeatedOpponents T u w).mpr (hall w hvw)
-
   --The reverse inclusion fails: u beats v, but v cannot beat itself.
   have hnot_reverse : ¬ (defeatedOpponents T u ⊆ defeatedOpponents T v) := by
     intro hreverse
@@ -145,7 +144,6 @@ theorem outdegree_lt_of_beats_all [Fintype V]
       (mem_defeatedOpponents T u v).mpr huv
     have hmem_v : v ∈ defeatedOpponents T v := hreverse hmem_u
     exact T.no_self v ((mem_defeatedOpponents T v v).mp hmem_v)
-
   --A proper subset of a finite set has fewer elements.
   have hstrict : defeatedOpponents T v ⊂ defeatedOpponents T u :=
     ⟨hsubset, hnot_reverse⟩
@@ -186,11 +184,14 @@ The main theorem shows that this vertex is a king.
 -/
 
 /-- Every finite, nonempty tournament has a king. -/
-theorem exists_king [Fintype V] [Nonempty V]
+theorem exists_king [Finite V] [Nonempty V]
     (T : Tournament V) :
     ∃ v, isKing T v := by
-  obtain ⟨v, hmax⟩ := exists_maximum_outdegree T
-  exact ⟨v, maximum_outdegree_isKing T v hmax⟩
+  classical
+  -- Obtain an enumeration for the earlier counting lemmas.
+let : Fintype V := Fintype.ofFinite V
+obtain ⟨v, hmax⟩ := exists_maximum_outdegree T
+exact ⟨v, maximum_outdegree_isKing T v hmax⟩
 
 end
 end TournamentKings
