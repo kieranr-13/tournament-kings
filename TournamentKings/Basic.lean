@@ -1,4 +1,4 @@
-import import Mathlib.TacticMinImports
+import Mathlib
 
 
 namespace TournamentKings
@@ -129,14 +129,13 @@ set contains all of v's defeated opponents plus at least one more: v.
 /-- Beating v and all of v's defeated opponents gives u more wins. -/
 theorem outdegree_lt_of_beats_all [Fintype V]
   (T : Tournament V) (v u : V)
-  (huv : T.beats u v)
-  (hall : T.beats u v)
+  (huv : T.Beats u v)
   (hall : ∀ w, T.Beats v w → T.Beats u w) :
   outdegree T v < outdegree T u := by
   --Every opponent v beats also belongs to u's set.
   have hsubset : defeatedOpponents T v ⊆ defeatedOpponents T u := by
     intro w hwv
-    have hvw : T.beats v w := (mem_defeatedOponnents t v w).mp hw
+    have hvw : T.Beats v w := (mem_defeatedOpponents T v w).mp hwv
     exact (mem_defeatedOpponents T u w).mpr (hall w hvw)
 
   --The reverse inclusion fails: u beats v, but v cannot beat itself.
@@ -152,6 +151,46 @@ theorem outdegree_lt_of_beats_all [Fintype V]
     lt_of_le_not_le hsubset hnot_reverse
   exact Finset.card_lt_card hstrict
 
-#min-imports
+/-! ## Main Theorem
+
+Every maximum-outdegree vertex is a king.
+Otherwise, an unreachable vertex would have strictly more wins,
+contradicting maximality.
+-/
+
+/-- Every vertex with maximum outdegree is a king. -/
+theorem maximum_outdegree_isKing [Fintype V]
+    (T : Tournament V) (v : V)
+    (hmax : HasMaximumOutdegree T v) :
+    isKing T v := by
+  classical
+  intro u hne
+  -- A direct win already gives the required route.
+  by_cases hvu : T.Beats v u
+  · left
+    exact hvu
+  · right
+    -- If there is no two-step route, u beats v and everyone v beats.
+    by_contra hno_two
+    obtain ⟨huv, hall⟩ :=
+      unreachable_beats_all T v u hne hvu hno_two
+    have hmore : outdegree T v < outdegree T u :=
+      outdegree_lt_of_beats_all T v u huv hall
+    -- This contradicts v having maximum outdegree.
+    exact (not_lt_of_ge (hmax u)) hmore
+
+/-! ## Existence of a King
+
+A finite, nonempty tournament has a maximum-outdegree vertex.
+The main theorem shows that this vertex is a king.
+-/
+
+/-- Every finite, nonempty tournament has a king. -/
+theorem exists_king [Fintype V] [Nonempty V]
+    (T : Tournament V) :
+    ∃ v, isKing T v := by
+  obtain ⟨v, hmax⟩ := exists_maximum_outdegree T
+  exact ⟨v, maximum_outdegree_isKing T v hmax⟩
+
 end
 end TournamentKings
