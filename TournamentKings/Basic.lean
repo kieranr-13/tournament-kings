@@ -189,9 +189,9 @@ theorem exists_king [Finite V] [Nonempty V]
     ∃ v, isKing T v := by
   classical
   -- Obtain an enumeration for the earlier counting lemmas.
-let : Fintype V := Fintype.ofFinite V
-obtain ⟨v, hmax⟩ := exists_maximum_outdegree T
-exact ⟨v, maximum_outdegree_isKing T v hmax⟩
+  let : Fintype V := Fintype.ofFinite V
+  obtain ⟨v, hmax⟩ := exists_maximum_outdegree T
+  exact ⟨v, maximum_outdegree_isKing T v hmax⟩
 
 end
 end TournamentKings
