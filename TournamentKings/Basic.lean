@@ -148,7 +148,7 @@ theorem outdegree_lt_of_beats_all [Fintype V]
 
   --A proper subset of a finite set has fewer elements.
   have hstrict : defeatedOpponents T v ⊂ defeatedOpponents T u :=
-    lt_of_le_not_le hsubset hnot_reverse
+    ⟨hsubset, hnot_reverse⟩
   exact Finset.card_lt_card hstrict
 
 /-! ## Main Theorem
